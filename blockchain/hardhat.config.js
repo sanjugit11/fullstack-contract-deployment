@@ -26,6 +26,19 @@ module.exports = {
       url: "http://127.0.0.1:8545"
     }
   },
+  etherscan: {
+    apiKey: process.env.ETHERSCAN_API_KEY || "",
+    customChains: [
+      {
+        network: "hoodi",
+        chainId: 560048,
+        urls: {
+          apiURL: "https://api-hoodi.etherscan.io/api",
+          browserURL: "https://hoodi.etherscan.io"
+        }
+      }
+    ]
+  },
   gasReporter: {
     enabled: process.env.REPORT_GAS === "true",
     currency: "USD"

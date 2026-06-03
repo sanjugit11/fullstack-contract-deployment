@@ -46,7 +46,7 @@ contract SimpleCounter {
     function decrement() external {
         require(counter > 0, "SimpleCounter: Counter cannot go below 0");
         counter -= 1;
-        emit CounterIncremented(msg.sender, counter);
+        emit CounterDecremented(msg.sender, counter);
     }
 
     /**
