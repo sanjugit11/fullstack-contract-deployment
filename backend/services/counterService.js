@@ -7,6 +7,9 @@ const HOODI_NETWORK = {
   chainId: 560048
 };
 
+const DEFAULT_HOODI_RPC_URL = 'https://ethereum-hoodi-rpc.publicnode.com';
+const BLOCKED_HOODI_RPC_HOSTS = new Set(['0xrpc.io']);
+
 function requireEnv(name) {
   const value = env[name];
 
@@ -17,14 +20,38 @@ function requireEnv(name) {
   return value.trim();
 }
 
+function hostnameFromUrl(value) {
+  try {
+    return new URL(value).hostname;
+  } catch (error) {
+    return 'invalid';
+  }
+}
+
+function getHoodiRpcUrl() {
+  const configuredUrl = requireEnv('HOODI_RPC_URL');
+  const hostname = hostnameFromUrl(configuredUrl);
+
+  if (BLOCKED_HOODI_RPC_HOSTS.has(hostname)) {
+    console.warn(
+      `Ignoring unsupported HOODI_RPC_URL host "${hostname}". Falling back to ${DEFAULT_HOODI_RPC_URL}`
+    );
+    return DEFAULT_HOODI_RPC_URL;
+  }
+
+  return configuredUrl;
+}
+
 class CounterService {
   constructor() {
     this.initializationError = null;
+    this.rpcUrl = null;
 
     try {
-      const rpcUrl = requireEnv('HOODI_RPC_URL');
+      const rpcUrl = getHoodiRpcUrl();
       const privateKey = requireEnv('PRIVATE_KEY');
       this.contractAddress = requireEnv('HOODI_COUNTER_ADDRESS');
+      this.rpcUrl = rpcUrl;
 
       if (!ethers.isAddress(this.contractAddress)) {
         throw new Error('HOODI_COUNTER_ADDRESS must be a valid contract address in backend/.env');
@@ -47,8 +74,13 @@ class CounterService {
 
     return {
       success: false,
-      error: this.initializationError.message
+      error: this.initializationError.message,
+      rpcHost: this.rpcUrl ? hostnameFromUrl(this.rpcUrl) : null
     };
+  }
+
+  getRpcHost() {
+    return this.rpcUrl ? hostnameFromUrl(this.rpcUrl) : null;
   }
 
   /**
@@ -65,12 +97,14 @@ class CounterService {
       const value = await contract.getValue();
       return {
         success: true,
-        value: value.toString()
+        value: value.toString(),
+        rpcHost: this.getRpcHost()
       };
     } catch (error) {
       return {
         success: false,
-        error: error.message
+        error: error.message,
+        rpcHost: this.getRpcHost()
       };
     }
   }
@@ -96,12 +130,14 @@ class CounterService {
         transactionHash: receipt.hash,
         blockNumber: receipt.blockNumber,
         newValue: newValue.toString(),
-        action: 'increment'
+        action: 'increment',
+        rpcHost: this.getRpcHost()
       };
     } catch (error) {
       return {
         success: false,
-        error: error.message
+        error: error.message,
+        rpcHost: this.getRpcHost()
       };
     }
   }
@@ -127,12 +163,14 @@ class CounterService {
         transactionHash: receipt.hash,
         blockNumber: receipt.blockNumber,
         newValue: newValue.toString(),
-        action: 'decrement'
+        action: 'decrement',
+        rpcHost: this.getRpcHost()
       };
     } catch (error) {
       return {
         success: false,
-        error: error.message
+        error: error.message,
+        rpcHost: this.getRpcHost()
       };
     }
   }
@@ -155,12 +193,14 @@ class CounterService {
         transactionHash: receipt.hash,
         blockNumber: receipt.blockNumber,
         newValue: newValue.toString(),
-        action: 'setValue'
+        action: 'setValue',
+        rpcHost: this.getRpcHost()
       };
     } catch (error) {
       return {
         success: false,
-        error: error.message
+        error: error.message,
+        rpcHost: this.getRpcHost()
       };
     }
   }
@@ -187,12 +227,14 @@ class CounterService {
         blockNumber: receipt.blockNumber,
         newValue: newValue.toString(),
         incrementBy: amount.toString(),
-        action: 'incrementBy'
+        action: 'incrementBy',
+        rpcHost: this.getRpcHost()
       };
     } catch (error) {
       return {
         success: false,
-        error: error.message
+        error: error.message,
+        rpcHost: this.getRpcHost()
       };
     }
   }
@@ -219,12 +261,14 @@ class CounterService {
         blockNumber: receipt.blockNumber,
         newValue: newValue.toString(),
         decrementBy: amount.toString(),
-        action: 'decrementBy'
+        action: 'decrementBy',
+        rpcHost: this.getRpcHost()
       };
     } catch (error) {
       return {
         success: false,
-        error: error.message
+        error: error.message,
+        rpcHost: this.getRpcHost()
       };
     }
   }

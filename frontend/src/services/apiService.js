@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://fullstack-contract-deployment.onrender.com/api';
 
 export const tokenService = {
   getBalance: async (address) => {
@@ -75,7 +75,7 @@ export const tokenService = {
 export const counterService = {
   getValue: async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/counter/current`);
+      const response = await axios.get(`${API_BASE_URL}/counter/value`);
       return response.data;
     } catch (error) {
       return {

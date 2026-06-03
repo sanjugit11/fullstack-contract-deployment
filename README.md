@@ -94,6 +94,10 @@ cp .env.example .env
 
 # Start server (runs on port 5000)
 npm run dev
+
+# test cases run
+npm test
+npm run test:reorg
 ```
 
 ### 3. Frontend Setup
